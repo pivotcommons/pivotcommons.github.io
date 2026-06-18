@@ -1,1092 +1,1252 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pivot Commons — Architecture</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  /* ── RESET & BASE ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<head><script type='text/javascript' src='https://prod-chat-kimi.tos-cn-beijing.volces.com/QX31hsbLuvus4oP4l5AyK2yI3fpl1KwydHR_H5LkhY9OwO9QoNBNbagdPmDshhKJrC6A0DP_hLDAkqVj8VXOPe1Si5QfQRrkYHTcJuxCi-TlJvCsIdVNutyp62ycAgQa6sQc60QirC-xv6iOCGT4IS8F95c9t2tVfYUeZHTD_ugCoxr8ix9NnafvYeZZtQOaiMgZXmT8YY5zZhr1vFuvS6nbh_A8JecBXSaYC8KdfDXBGfDIrFc0w7maNag5lksZiEajSORBfl4nQkBSQDobnF7GT2OqfXqagCy9O30fUrAsVQ_JYkMMr6rfiyosFhSW6dCcWjrnEoyspeh3Gj-Nb9WWMi6K7MGE8J1RrQad7pLY-ICuNM64Wl49W1td67SZhvT2oBfTflnIOYwenuihkdcb_DdeBjLBZlna3qT87LTY0AEnAyS52qy9M6dPpyW64e8MMtdvFSyCOG-V-RY0d-FHNa6JP0SA_kolLDvgMfcpGOqxybqjx48t08tw5HqamWrIoMWhwDXU4L-VkvowiRVh3CoKehmOSGkJoi_zSksob1JwRAIAIBBCNr2A1tCb0HSE_9vcA2HKFPhU3MUcvNNcp2PHJTNMpoK15Ae5klG3AzWh26h3ReQkqxC597gnTU5nVhKG5om8oDE7hKbiWQQ6y_rXJUNpwBvmMD6_oinfigyittUjSaldiHcFyTxd9q8CR0zZC4j9X-Fs3PetMFKNJf3gzhhj-YkVjPbaRtEKX4yiFOSC-F9ONtJi_VDc2K80tQnEZAWB3US4FpfqYDp4rnF5t-gwsJW1VH5CXUXMXZBoUKyJ-XJUPzWvnTcM1yZ8_RTpaj8j4nZ93gQpi1B_SmVR9wNZ9zHWWNVqMP40MtPDm3V80PL8zTFuW73uabfcRwVOs01GYwRZhZYxHlhysFU118V8uRMbXsNb77SRIJHLDrHNv7P1nrriOBwoNvFy6Wt0EJxrVxkZLxerPavJlCYQVfRopCohaSzpfgVsBFi1IBm6cygDYM-9lPfEaY5ZPfB5IkUHRgmlv2r5EETx3mTINo7WkhtLWjopty_BbGAjt7o_Y-KiNBwlVjsC2vA'></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pivot Commons — Design. Narrate. Shift.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #f5f2ed;
+            --color-bg-warm: #e8e4de;
+            --color-text: #1a1a1a;
+            --color-accent: #c4a77d;
+            --color-dark: #1a1a1a;
+            --color-light: #f5f2ed;
+            --color-muted: #6b6560;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --border-brutal: 3px solid var(--color-dark);
+            --transition-smooth: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-  :root {
-    --ink: #1a1814;
-    --bone: #f0ece3;
-    --clay: #b5855a;
-    --moss: #3d4a34;
-    --rust: #9c4a2b;
-    --off: #e8e2d6;
-    --mid: #7a7060;
-    --light-moss: #6b7a5e;
-    --font-display: 'Bebas Neue', sans-serif;
-    --font-serif: 'DM Serif Display', serif;
-    --font-body: 'Instrument Sans', sans-serif;
-  }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+        }
 
-  body {
-    background: var(--bone);
-    color: var(--ink);
-    font-family: var(--font-body);
-    font-size: 16px;
-    line-height: 1.6;
-    overflow-x: hidden;
-    cursor: default;
-  }
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  /* ── CUSTOM CURSOR ── */
-  body { cursor: none; }
-  #cursor {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: var(--clay);
-    position: fixed;
-    top: 0; left: 0;
-    pointer-events: none;
-    z-index: 9999;
-    transition: transform 0.15s ease, opacity 0.2s;
-    mix-blend-mode: multiply;
-  }
-  #cursor-ring {
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    border: 1px solid var(--clay);
-    position: fixed;
-    top: 0; left: 0;
-    pointer-events: none;
-    z-index: 9998;
-    transition: transform 0.35s ease, width 0.3s, height 0.3s, opacity 0.3s;
-  }
-  body:hover #cursor { opacity: 1; }
+        /* Grain Texture Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.025;
+            pointer-events: none;
+            z-index: 9999;
+        }
 
-  /* ── NAV ── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 3rem;
-    mix-blend-mode: multiply;
-    transition: background 0.4s, padding 0.4s;
-  }
-  nav.scrolled {
-    background: rgba(240,236,227,0.92);
-    backdrop-filter: blur(8px);
-    padding: 1rem 3rem;
-    mix-blend-mode: normal;
-    border-bottom: 1px solid rgba(26,24,20,0.1);
-  }
-  .nav-logo {
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    letter-spacing: 0.08em;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .nav-links {
-    display: flex;
-    gap: 2.5rem;
-    list-style: none;
-  }
-  .nav-links a {
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink);
-    text-decoration: none;
-    position: relative;
-    padding-bottom: 2px;
-  }
-  .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0;
-    width: 0; height: 1px;
-    background: var(--clay);
-    transition: width 0.3s ease;
-  }
-  .nav-links a:hover::after { width: 100%; }
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
 
-  /* ── HERO ── */
-  #hero {
-    position: relative;
-    height: 100vh;
-    min-height: 700px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 0 3rem 4rem;
-  }
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1800&q=80&auto=format&fit=crop') center/cover no-repeat;
-    filter: brightness(0.65);
-    transform: scale(1.05);
-    transition: transform 8s ease;
-  }
-  .hero-bg.loaded { transform: scale(1); }
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(26,24,20,0.7) 0%, rgba(26,24,20,0.1) 60%, transparent 100%);
-  }
-  .hero-content { position: relative; z-index: 2; max-width: 900px; }
-  .hero-eyebrow {
-    font-family: var(--font-body);
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--clay);
-    margin-bottom: 1.2rem;
-    opacity: 0;
-    animation: fadeUp 0.6s 0.3s forwards;
-  }
-  .hero-headline {
-    font-family: var(--font-display);
-    font-size: clamp(4rem, 10vw, 9rem);
-    line-height: 0.9;
-    color: var(--bone);
-    letter-spacing: 0.02em;
-    overflow: hidden;
-  }
-  .hero-word {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(60px);
-  }
-  .hero-word:nth-child(1) { animation: wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.5s forwards; }
-  .hero-word:nth-child(2) { animation: wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.75s forwards; }
-  .hero-word:nth-child(3) { animation: wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 1.0s forwards; }
-  .hero-word:nth-child(4) { animation: wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 1.25s forwards; }
-  .hero-word.italic { font-family: var(--font-serif); font-style: italic; color: var(--clay); }
-  .hero-sub {
-    font-size: 1rem;
-    color: rgba(240,236,227,0.75);
-    max-width: 420px;
-    margin-top: 2rem;
-    line-height: 1.7;
-    opacity: 0;
-    animation: fadeUp 0.7s 1.6s forwards;
-  }
-  .hero-cta {
-    margin-top: 2.5rem;
-    display: flex;
-    gap: 1rem;
-    opacity: 0;
-    animation: fadeUp 0.7s 1.9s forwards;
-  }
-  .btn-primary {
-    display: inline-block;
-    padding: 0.85rem 2.2rem;
-    background: var(--clay);
-    color: var(--bone);
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: background 0.25s, transform 0.2s;
-  }
-  .btn-primary:hover { background: var(--rust); transform: translateY(-2px); }
-  .btn-outline {
-    display: inline-block;
-    padding: 0.85rem 2.2rem;
-    border: 1px solid rgba(240,236,227,0.5);
-    color: var(--bone);
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: border-color 0.25s, background 0.25s;
-  }
-  .btn-outline:hover { border-color: var(--bone); background: rgba(240,236,227,0.1); }
-  .hero-scroll {
-    position: absolute;
-    bottom: 2rem; right: 3rem;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    opacity: 0;
-    animation: fadeUp 0.7s 2.2s forwards;
-  }
-  .hero-scroll span {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(240,236,227,0.5);
-    writing-mode: vertical-rl;
-  }
-  .scroll-line {
-    width: 1px; height: 60px;
-    background: rgba(240,236,227,0.3);
-    position: relative;
-    overflow: hidden;
-  }
-  .scroll-line::after {
-    content: '';
-    position: absolute;
-    top: -100%; left: 0;
-    width: 100%; height: 100%;
-    background: var(--clay);
-    animation: scrollDrop 1.5s 2.5s ease-in-out infinite;
-  }
+        .label {
+            font-family: var(--font-heading);
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--color-muted);
+        }
 
-  /* ── TICKER ── */
-  .ticker-wrap {
-    background: var(--moss);
-    padding: 0.9rem 0;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-  .ticker-track {
-    display: inline-flex;
-    animation: ticker 28s linear infinite;
-  }
-  .ticker-item {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    letter-spacing: 0.1em;
-    color: var(--bone);
-    padding: 0 2.5rem;
-    opacity: 0.85;
-  }
-  .ticker-dot {
-    color: var(--clay);
-    padding: 0 0.5rem;
-    opacity: 1;
-  }
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: transparent;
+            transition: var(--transition-smooth);
+            border-bottom: 3px solid transparent;
+        }
 
-  /* ── SECTION SHARED ── */
-  section { padding: 7rem 3rem; }
-  .section-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--clay);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-  .section-label::before {
-    content: '';
-    display: inline-block;
-    width: 28px; height: 1px;
-    background: var(--clay);
-  }
-  h2.section-title {
-    font-family: var(--font-serif);
-    font-size: clamp(2.2rem, 5vw, 3.8rem);
-    line-height: 1.1;
-    color: var(--ink);
-    max-width: 680px;
-  }
+        nav.scrolled {
+            background: rgba(245, 242, 237, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: var(--border-brutal);
+        }
 
-  /* ── SCROLL REVEAL ── */
-  .reveal {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-  .reveal-delay-1 { transition-delay: 0.1s; }
-  .reveal-delay-2 { transition-delay: 0.2s; }
-  .reveal-delay-3 { transition-delay: 0.35s; }
-  .reveal-delay-4 { transition-delay: 0.5s; }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  /* ── ABOUT ── */
-  #about {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5rem;
-    align-items: center;
-    background: var(--bone);
-  }
-  .about-img-wrap {
-    position: relative;
-    aspect-ratio: 3/4;
-    overflow: hidden;
-  }
-  .about-img-wrap img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transition: transform 0.8s ease;
-  }
-  .about-img-wrap:hover img { transform: scale(1.04); }
-  .about-accent {
-    position: absolute;
-    bottom: -20px; right: -20px;
-    width: 180px; height: 180px;
-    border: 2px solid var(--clay);
-    z-index: -1;
-  }
-  .about-text p {
-    color: var(--mid);
-    line-height: 1.85;
-    margin-top: 1.5rem;
-    max-width: 480px;
-  }
-  .about-stat-row {
-    display: flex;
-    gap: 3rem;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--off);
-  }
-  .about-stat-num {
-    font-family: var(--font-display);
-    font-size: 3.5rem;
-    color: var(--ink);
-    line-height: 1;
-  }
-  .about-stat-label {
-    font-size: 0.75rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--mid);
-    margin-top: 0.3rem;
-  }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
 
-  /* ── SERVICES / PARALLAX ── */
-  #services {
-    background: var(--ink);
-    position: relative;
-    overflow: hidden;
-    padding: 8rem 3rem;
-  }
-  .services-bg-shape {
-    position: absolute;
-    top: -80px; right: -80px;
-    width: 500px; height: 500px;
-    border-radius: 50%;
-    border: 1px solid rgba(181,133,90,0.15);
-    will-change: transform;
-  }
-  .services-bg-shape-2 {
-    position: absolute;
-    bottom: -120px; left: -60px;
-    width: 350px; height: 350px;
-    border-radius: 50%;
-    border: 1px solid rgba(181,133,90,0.08);
-    will-change: transform;
-  }
-  #services .section-label { color: var(--clay); }
-  #services h2.section-title { color: var(--bone); }
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-top: 4rem;
-    position: relative;
-    z-index: 2;
-  }
-  .service-card {
-    background: rgba(240,236,227,0.04);
-    border: 1px solid rgba(240,236,227,0.08);
-    padding: 2.5rem;
-    transition: background 0.35s, border-color 0.35s;
-    position: relative;
-    overflow: hidden;
-  }
-  .service-card::before {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0;
-    width: 0; height: 2px;
-    background: var(--clay);
-    transition: width 0.4s ease;
-  }
-  .service-card:hover::before { width: 100%; }
-  .service-card:hover {
-    background: rgba(240,236,227,0.07);
-    border-color: rgba(240,236,227,0.15);
-  }
-  .service-num {
-    font-family: var(--font-display);
-    font-size: 4rem;
-    color: rgba(181,133,90,0.25);
-    line-height: 1;
-    margin-bottom: 1.5rem;
-  }
-  .service-title {
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    color: var(--bone);
-    margin-bottom: 1rem;
-  }
-  .service-desc {
-    font-size: 0.9rem;
-    color: rgba(240,236,227,0.5);
-    line-height: 1.75;
-  }
-  .service-tag {
-    display: inline-block;
-    margin-top: 1.5rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--clay);
-    padding-bottom: 2px;
-    border-bottom: 1px solid var(--clay);
-  }
+        .logo-mark {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--color-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--color-dark);
+            background: var(--color-accent);
+        }
 
-  /* ── PORTFOLIO ── */
-  #portfolio { background: var(--off); padding: 7rem 3rem; }
-  .portfolio-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 3.5rem;
-  }
-  .portfolio-link {
-    font-size: 0.8rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--clay);
-    text-decoration: none;
-    padding-bottom: 2px;
-    border-bottom: 1px solid var(--clay);
-    transition: color 0.2s;
-  }
-  .portfolio-link:hover { color: var(--rust); border-color: var(--rust); }
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    grid-template-rows: 340px 260px;
-    gap: 3px;
-  }
-  .portfolio-item {
-    position: relative;
-    overflow: hidden;
-    background: var(--mid);
-  }
-  .portfolio-item:first-child {
-    grid-row: 1 / 3;
-  }
-  .portfolio-item img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), filter 0.4s;
-    filter: brightness(0.85);
-  }
-  .portfolio-item:hover img {
-    transform: scale(1.07);
-    filter: brightness(0.65);
-  }
-  .portfolio-caption {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 1.5rem 1.5rem 1.2rem;
-    background: linear-gradient(to top, rgba(26,24,20,0.7), transparent);
-    transform: translateY(40%);
-    transition: transform 0.4s ease;
-  }
-  .portfolio-item:hover .portfolio-caption { transform: translateY(0); }
-  .portfolio-caption h3 {
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    color: var(--bone);
-    line-height: 1.2;
-  }
-  .portfolio-caption p {
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--clay);
-    margin-top: 0.3rem;
-  }
+        .logo-text {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+            color: var(--color-dark);
+        }
 
-  /* ── PROCESS ── */
-  #process {
-    background: var(--bone);
-    padding: 7rem 3rem;
-  }
-  .process-steps {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0;
-    margin-top: 4rem;
-    border-top: 1px solid var(--off);
-  }
-  .process-step {
-    padding: 2.5rem 2rem 2.5rem 0;
-    border-right: 1px solid var(--off);
-    position: relative;
-  }
-  .process-step:last-child { border-right: none; padding-right: 0; }
-  .process-step:not(:first-child) { padding-left: 2rem; }
-  .process-step-num {
-    font-family: var(--font-display);
-    font-size: 5rem;
-    color: var(--off);
-    line-height: 1;
-    margin-bottom: 1rem;
-  }
-  .process-step-title {
-    font-family: var(--font-serif);
-    font-size: 1.3rem;
-    color: var(--ink);
-    margin-bottom: 0.8rem;
-  }
-  .process-step-desc {
-    font-size: 0.875rem;
-    color: var(--mid);
-    line-height: 1.75;
-  }
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
 
-  /* ── TESTIMONIAL ── */
-  #testimonial {
-    background: var(--moss);
-    padding: 7rem 3rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .testimonial-quote-mark {
-    font-family: var(--font-serif);
-    font-size: 10rem;
-    color: rgba(240,236,227,0.08);
-    line-height: 0.5;
-    position: absolute;
-    top: 3rem; left: 3rem;
-  }
-  .testimonial-text {
-    font-family: var(--font-serif);
-    font-size: clamp(1.4rem, 3vw, 2.2rem);
-    font-style: italic;
-    color: var(--bone);
-    max-width: 760px;
-    margin: 0 auto;
-    line-height: 1.5;
-    position: relative;
-    z-index: 1;
-  }
-  .testimonial-author {
-    margin-top: 2.5rem;
-    font-size: 0.8rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--clay);
-  }
-  .testimonial-role {
-    font-size: 0.75rem;
-    color: rgba(240,236,227,0.4);
-    margin-top: 0.3rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
+        .nav-links a {
+            font-family: var(--font-heading);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-dark);
+            text-decoration: none;
+            position: relative;
+            padding-bottom: 0.25rem;
+        }
 
-  /* ── CONTACT ── */
-  #contact {
-    background: var(--ink);
-    padding: 7rem 3rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5rem;
-    align-items: center;
-  }
-  #contact .section-label { color: var(--clay); }
-  #contact h2.section-title { color: var(--bone); }
-  #contact p {
-    color: rgba(240,236,227,0.5);
-    margin-top: 1.5rem;
-    line-height: 1.8;
-    max-width: 420px;
-  }
-  .contact-info { margin-top: 3rem; }
-  .contact-row {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-    align-items: baseline;
-  }
-  .contact-row-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--clay);
-    min-width: 70px;
-  }
-  .contact-row-value {
-    font-size: 0.9rem;
-    color: rgba(240,236,227,0.7);
-  }
-  .contact-form { display: flex; flex-direction: column; gap: 0; }
-  .form-group { position: relative; margin-bottom: 1.5px; }
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    width: 100%;
-    background: rgba(240,236,227,0.05);
-    border: 1px solid rgba(240,236,227,0.1);
-    border-radius: 0;
-    color: var(--bone);
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    padding: 1.1rem 1.2rem;
-    outline: none;
-    transition: border-color 0.25s, background 0.25s;
-    appearance: none;
-  }
-  .form-group select option { background: var(--ink); }
-  .form-group input::placeholder,
-  .form-group textarea::placeholder { color: rgba(240,236,227,0.25); }
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
-    border-color: var(--clay);
-    background: rgba(240,236,227,0.08);
-  }
-  .form-group textarea { resize: vertical; min-height: 120px; }
-  .form-submit {
-    margin-top: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-  .form-submit .btn-primary { cursor: none; }
-  .form-note {
-    font-size: 0.75rem;
-    color: rgba(240,236,227,0.25);
-  }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-accent);
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-  /* ── FOOTER ── */
-  footer {
-    background: var(--bone);
-    padding: 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid var(--off);
-  }
-  .footer-logo {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    letter-spacing: 0.08em;
-    color: var(--ink);
-  }
-  .footer-copy {
-    font-size: 0.75rem;
-    color: var(--mid);
-    letter-spacing: 0.05em;
-  }
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-  }
-  .footer-links a {
-    font-size: 0.75rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--mid);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .footer-links a:hover { color: var(--clay); }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
 
-  /* ── ANIMATIONS ── */
-  @keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
-    from { opacity: 0; transform: translateY(20px); }
-  }
-  @keyframes wordIn {
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  @keyframes scrollDrop {
-    0% { top: -100%; }
-    50% { top: 100%; }
-    100% { top: 100%; }
-  }
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--color-dark);
+            overflow: hidden;
+        }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    nav { padding: 1.2rem 1.5rem; }
-    section { padding: 5rem 1.5rem; }
-    #about { grid-template-columns: 1fr; gap: 3rem; }
-    .about-img-wrap { aspect-ratio: 4/3; }
-    .services-grid { grid-template-columns: 1fr; }
-    .portfolio-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
-    .portfolio-item:first-child { grid-column: 1 / 3; grid-row: auto; }
-    .portfolio-caption { transform: translateY(0); }
-    .process-steps { grid-template-columns: 1fr 1fr; }
-    #contact { grid-template-columns: 1fr; }
-    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
-  }
-</style>
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            opacity: 0.4;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(26,26,26,0.3), rgba(26,26,26,0.8));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1000px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .hero-label {
+            font-family: var(--font-heading);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--color-accent);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+        }
+
+        .hero-headline {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            color: var(--color-light);
+            margin-bottom: 1.5rem;
+            line-height: 1.05;
+        }
+
+        .hero-headline span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: wordReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .hero-headline span:nth-child(1) { animation-delay: 0.4s; }
+        .hero-headline span:nth-child(2) { animation-delay: 0.5s; }
+        .hero-headline span:nth-child(3) { animation-delay: 0.6s; }
+        .hero-headline span:nth-child(4) { animation-delay: 0.7s; }
+        .hero-headline span:nth-child(5) { animation-delay: 0.8s; }
+        .hero-headline span:nth-child(6) { animation-delay: 0.9s; }
+        .hero-headline span:nth-child(7) { animation-delay: 1.0s; }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: rgba(245, 242, 237, 0.7);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 1.2s;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: var(--color-accent);
+            color: var(--color-dark);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            border: 3px solid var(--color-accent);
+            transition: var(--transition-smooth);
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 1.4s;
+        }
+
+        .hero-cta:hover {
+            background: transparent;
+            color: var(--color-accent);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 1.8s;
+        }
+
+        .scroll-indicator span {
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(245, 242, 237, 0.5);
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--color-accent), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        /* Marquee */
+        .marquee {
+            background: var(--color-dark);
+            border-top: var(--border-brutal);
+            border-bottom: var(--border-brutal);
+            padding: 1.5rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marqueeScroll 30s linear infinite;
+        }
+
+        .marquee-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            padding: 0 1.5rem;
+            white-space: nowrap;
+        }
+
+        .marquee-item {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-light);
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .marquee-item::after {
+            content: "•";
+            color: var(--color-accent);
+            font-size: 1.5rem;
+        }
+
+        /* Section Defaults */
+        section {
+            position: relative;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Reveal Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: var(--transition-smooth);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* About Section */
+        .about {
+            padding: 8rem 0;
+            background: var(--color-bg);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-content {
+            padding-right: 2rem;
+        }
+
+        .about-label {
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .about h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 2rem;
+            color: var(--color-dark);
+        }
+
+        .about p {
+            font-size: 1.125rem;
+            color: var(--color-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .about-image {
+            position: relative;
+            border: var(--border-brutal);
+            overflow: hidden;
+        }
+
+        .about-image::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--color-accent);
+            opacity: 0.1;
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            display: block;
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .about-image-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: var(--color-dark);
+            color: var(--color-light);
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            z-index: 2;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 8rem 0;
+            background: var(--color-bg-warm);
+            border-top: var(--border-brutal);
+        }
+
+        .services-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .services-header h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .services-header p {
+            font-size: 1.125rem;
+            color: var(--color-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            border: var(--border-brutal);
+        }
+
+        .service-card {
+            background: var(--color-bg);
+            padding: 3rem 2.5rem;
+            border-right: var(--border-brutal);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:last-child {
+            border-right: none;
+        }
+
+        .service-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--color-accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            background: var(--color-light);
+        }
+
+        .service-number {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 3rem;
+            color: var(--color-accent);
+            opacity: 0.3;
+            margin-bottom: 1.5rem;
+            line-height: 1;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-card p {
+            color: var(--color-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .service-image {
+            margin-top: 2rem;
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border: 2px solid var(--color-dark);
+            filter: grayscale(30%);
+            transition: filter 0.6s ease;
+        }
+
+        .service-card:hover .service-image {
+            filter: grayscale(0%);
+        }
+
+        /* Projects Section with Parallax */
+        .projects {
+            padding: 8rem 0;
+            background: var(--color-dark);
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .projects-parallax {
+            position: absolute;
+            inset: -20%;
+            background: url('https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            opacity: 0.15;
+            will-change: transform;
+        }
+
+        .projects-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .projects-header {
+            margin-bottom: 5rem;
+        }
+
+        .projects-header .label {
+            color: var(--color-accent);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .projects-header h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            color: var(--color-light);
+            max-width: 800px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .project-card {
+            position: relative;
+            border: 3px solid rgba(245, 242, 237, 0.1);
+            overflow: hidden;
+            background: rgba(26, 26, 26, 0.6);
+            transition: var(--transition-smooth);
+        }
+
+        .project-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-8px);
+        }
+
+        .project-card.featured {
+            grid-column: span 2;
+        }
+
+        .project-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .project-card:hover .project-image {
+            transform: scale(1.08);
+        }
+
+        .project-info {
+            padding: 2rem;
+            border-top: 3px solid rgba(245, 242, 237, 0.1);
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+        }
+
+        .project-card h3 {
+            font-size: 1.5rem;
+            color: var(--color-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-card p {
+            color: rgba(245, 242, 237, 0.6);
+            font-size: 0.95rem;
+        }
+
+        /* Team Section */
+        .team {
+            padding: 8rem 0;
+            background: var(--color-bg);
+            border-top: var(--border-brutal);
+        }
+
+        .team-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .team-header h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .team-header p {
+            font-size: 1.125rem;
+            color: var(--color-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .team-card {
+            background: var(--color-light);
+            border: var(--border-brutal);
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .team-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 12px 12px 0px var(--color-dark);
+        }
+
+        .team-image-wrap {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            background: var(--color-bg-warm);
+        }
+
+        .team-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .team-card:hover .team-image-wrap img {
+            transform: scale(1.05);
+        }
+
+        .team-info {
+            padding: 2rem;
+            border-top: var(--border-brutal);
+        }
+
+        .team-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .team-role {
+            font-family: var(--font-heading);
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+        }
+
+        .team-bio {
+            color: var(--color-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .team-clients {
+            font-size: 0.8rem;
+            color: var(--color-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+        }
+
+        .team-clients strong {
+            color: var(--color-dark);
+            font-family: var(--font-heading);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 8rem 0;
+            background: var(--color-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+            opacity: 0.08;
+        }
+
+        .contact-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            color: var(--color-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .contact > .container > p {
+            font-size: 1.25rem;
+            color: rgba(245, 242, 237, 0.6);
+            margin-bottom: 4rem;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+
+        .contact-card {
+            border: 3px solid rgba(245, 242, 237, 0.1);
+            padding: 3rem 2rem;
+            transition: var(--transition-smooth);
+            text-align: left;
+        }
+
+        .contact-card:hover {
+            border-color: var(--color-accent);
+            background: rgba(196, 167, 125, 0.05);
+        }
+
+        .contact-card .label {
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .contact-card h3 {
+            font-size: 1.75rem;
+            color: var(--color-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-card a {
+            color: rgba(245, 242, 237, 0.7);
+            text-decoration: none;
+            font-size: 1.125rem;
+            transition: color 0.3s ease;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-card a:hover {
+            color: var(--color-accent);
+        }
+
+        .contact-card p {
+            color: rgba(245, 242, 237, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--color-dark);
+            border-top: var(--border-brutal);
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--color-light);
+            letter-spacing: -0.02em;
+        }
+
+        .footer-tagline {
+            font-family: var(--font-heading);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-muted);
+        }
+
+        .footer-copy {
+            font-size: 0.875rem;
+            color: var(--color-muted);
+        }
+
+        /* Keyframes */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes wordReveal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes marqueeScroll {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scaleY(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scaleY(1.2);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .about-content {
+                padding-right: 0;
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .service-card {
+                border-right: none;
+                border-bottom: var(--border-brutal);
+            }
+            .service-card:last-child {
+                border-bottom: none;
+            }
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            .project-card.featured {
+                grid-column: span 1;
+            }
+            .team-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .hero-headline {
+                font-size: 2.5rem;
+            }
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-mark">PC</div>
+                <span class="logo-text">PIVOT COMMONS</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 
-<!-- Cursor -->
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-label">Urban Design Studio</div>
+            <h1 class="hero-headline">
+                <span>A</span> <span>pivot</span> <span>is</span> <span>the</span> <span>moment</span> <span>things</span> <span>shift.</span>
+            </h1>
+            <p class="hero-subtitle">Our purpose is to make that shift happen — in how public spaces are imagined, designed, and built. Two urban designers. One powerful combination.</p>
+            <a href="#contact" class="hero-cta">Start a Conversation</a>
+        </div>
+        <div class="scroll-indicator">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
 
-<!-- Nav -->
-<nav id="nav">
-  <a href="#" class="nav-logo">Pivot Commons</a>
-  <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#portfolio">Portfolio</a></li>
-    <li><a href="#process">Process</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
+    <!-- Marquee -->
+    <div class="marquee">
+        <div class="marquee-track">
+            <div class="marquee-content">
+                <span class="marquee-item">Design</span>
+                <span class="marquee-item">Narrate</span>
+                <span class="marquee-item">Shift</span>
+                <span class="marquee-item">Urban Design</span>
+                <span class="marquee-item">Master Planning</span>
+                <span class="marquee-item">Sustainable Architecture</span>
+                <span class="marquee-item">Public Realm</span>
+                <span class="marquee-item">Heritage Sensitive Design</span>
+                <span class="marquee-item">Mobility Solutions</span>
+                <span class="marquee-item">Residential Developments</span>
+            </div>
+            <div class="marquee-content">
+                <span class="marquee-item">Design</span>
+                <span class="marquee-item">Narrate</span>
+                <span class="marquee-item">Shift</span>
+                <span class="marquee-item">Urban Design</span>
+                <span class="marquee-item">Master Planning</span>
+                <span class="marquee-item">Sustainable Architecture</span>
+                <span class="marquee-item">Public Realm</span>
+                <span class="marquee-item">Heritage Sensitive Design</span>
+                <span class="marquee-item">Mobility Solutions</span>
+                <span class="marquee-item">Residential Developments</span>
+            </div>
+        </div>
+    </div>
 
-<!-- Hero -->
-<section id="hero">
-  <div class="hero-bg" id="heroBg"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <p class="hero-eyebrow">Architecture &amp; Urban Planning — Est. 2009</p>
-    <h1 class="hero-headline">
-      <span class="hero-word">Space&nbsp;</span><span class="hero-word italic">that&nbsp;</span><span class="hero-word">Speaks.&nbsp;</span><span class="hero-word">Endures.</span>
-    </h1>
-    <p class="hero-sub">Pivot Commons designs buildings and communities where boldness meets restraint — structures that root themselves in place and time.</p>
-    <div class="hero-cta">
-      <a href="#portfolio" class="btn-primary">View Our Work</a>
-      <a href="#contact" class="btn-outline">Start a Project</a>
-    </div>
-  </div>
-  <div class="hero-scroll">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
-</section>
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content reveal">
+                    <span class="label about-label">Why Pivot Commons?</span>
+                    <h2>Great cities emerge at the intersection of people and place.</h2>
+                    <p>We are two urban designers driven by a simple belief: better urban experiences create better lives. With four years of individual practice across India, the Middle East, and the UK, we bring a powerful combination of public-sector implementation rigour and international design sophistication.</p>
+                    <p>From mobility exhibitions and heritage walkways to lakefront master plans and smart city precincts, we shape integrated urban environments through multidisciplinary collaboration, stakeholder management, and research-driven design.</p>
+                </div>
+                <div class="about-image reveal">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" alt="Modern architectural interior">
+                    <div class="about-image-caption">Design. Narrate. Shift.</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Ticker -->
-<div class="ticker-wrap" aria-hidden="true">
-  <div class="ticker-track" id="tickerTrack">
-    <span class="ticker-item">Residential Design</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Urban Planning</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Sustainable Architecture</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Luxury Interiors</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Commercial Development</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Adaptive Reuse</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Landscape Integration</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Residential Design</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Urban Planning</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Sustainable Architecture</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Luxury Interiors</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Commercial Development</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Adaptive Reuse</span>
-    <span class="ticker-dot">✦</span>
-    <span class="ticker-item">Landscape Integration</span>
-    <span class="ticker-dot">✦</span>
-  </div>
-</div>
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="services-header reveal">
+                <span class="label">What We Do</span>
+                <h2>Services crafted for visionary clients</h2>
+                <p>From concept to tender, we plug in as a skilled, responsive urban design partner for luxury residential estates, commercial developments, and public realm projects.</p>
+            </div>
+            <div class="services-grid reveal">
+                <div class="service-card">
+                    <div class="service-number">01</div>
+                    <h3>Residential Design</h3>
+                    <p>Bespoke residential master planning and estate design that prioritizes human experience, connectivity, and lasting value. From private villas to mixed-use developments, we craft environments where architecture and landscape converge.</p>
+                    <img class="service-image" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80" alt="Luxury residential architecture">
+                </div>
+                <div class="service-card">
+                    <div class="service-number">02</div>
+                    <h3>Urban Planning</h3>
+                    <p>Strategic urban design and master planning for cities, corridors, and precincts. We integrate mobility systems, transit-oriented development, public realm strategy, and regulatory compliance into cohesive, implementable visions.</p>
+                    <img class="service-image" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=800&q=80" alt="Urban planning aerial view">
+                </div>
+                <div class="service-card">
+                    <div class="service-number">03</div>
+                    <h3>Sustainable Architecture</h3>
+                    <p>Heritage-sensitive adaptive reuse, climate-resilient public realm design, and sustainable mobility solutions. We balance ecological responsibility with cultural continuity — creating places that endure.</p>
+                    <img class="service-image" src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80" alt="Sustainable green architecture">
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- About -->
-<section id="about">
-  <div class="about-img-wrap reveal">
-    <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=900&q=80&auto=format&fit=crop" alt="Pivot Commons studio interior" loading="lazy">
-    <div class="about-accent"></div>
-  </div>
-  <div class="about-text">
-    <p class="section-label reveal reveal-delay-1">Our Practice</p>
-    <h2 class="section-title reveal reveal-delay-2">Design. Narrate. Shift.</h2>
-    <p class="reveal reveal-delay-3">Pivot Commons was founded on a single conviction: that great architecture doesn't impose itself on a landscape — it listens. Our practice blends brutalist material honesty with organic geometries and modern precision, creating spaces that feel inevitable.</p>
-    <p class="reveal reveal-delay-3">We work with luxury homeowners who want a home that is genuinely theirs, and with developers bold enough to shape how cities breathe.</p>
-    <div class="about-stat-row reveal reveal-delay-4">
-      <div>
-        <div class="about-stat-num">140+</div>
-        <div class="about-stat-label">Projects Delivered</div>
-      </div>
-      <div>
-        <div class="about-stat-num">22</div>
-        <div class="about-stat-label">Design Awards</div>
-      </div>
-      <div>
-        <div class="about-stat-num">16</div>
-        <div class="about-stat-label">Countries</div>
-      </div>
-    </div>
-  </div>
-</section>
+    <!-- Projects Section -->
+    <section class="projects" id="projects">
+        <div class="projects-parallax" data-speed="0.4"></div>
+        <div class="container projects-content">
+            <div class="projects-header reveal">
+                <span class="label">Selected Work</span>
+                <h2>Projects from our individual practices — the experience we bring to the table.</h2>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card featured reveal">
+                    <img class="project-image" src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1600&q=80" alt="SG Highway Redevelopment">
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span>Ahmedabad</span>
+                            <span>Urban Corridor</span>
+                        </div>
+                        <h3>SG Highway Redevelopment</h3>
+                        <p>42km corridor study. Led urban design for a 2.3km stretch — Pakwan to Palladium — integrating street design, public realm improvements, and multi-modal connectivity for AMC and GMC.</p>
+                    </div>
+                </div>
+                <div class="project-card reveal">
+                    <img class="project-image" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" alt="Jeddah Historic District">
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span>Jeddah</span>
+                            <span>Heritage & Public Realm</span>
+                        </div>
+                        <h3>Jeddah Historic District</h3>
+                        <p>Led a key street and public realm package within a 50-hectare heritage-sensitive district, delivering urban design solutions from schematic to detailed design for AECOM and DDA.</p>
+                    </div>
+                </div>
+                <div class="project-card reveal">
+                    <img class="project-image" src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80" alt="Heritage Walkway Development">
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span>Diu</span>
+                            <span>Adaptive Reuse</span>
+                        </div>
+                        <h3>Heritage Walkway Development</h3>
+                        <p>Transformed Diu's historic city wall through adaptive reuse, public realm improvements, and heritage-sensitive design under the Smart City Mission.</p>
+                    </div>
+                </div>
+                <div class="project-card reveal">
+                    <img class="project-image" src="https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=800&q=80" alt="Palm Jebel Ali Master Planning">
+                    <div class="project-info">
+                        <div class="project-meta">
+                            <span>Dubai</span>
+                            <span>Master Planning</span>
+                        </div>
+                        <h3>Palm Jebel Ali Master Plan</h3>
+                        <p>Design report graphics including 3D villa massing studies and context-responsive street sections tailored to varying ROWs and edge conditions across the development.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Services -->
-<section id="services">
-  <div class="services-bg-shape" id="parallaxShape1"></div>
-  <div class="services-bg-shape-2" id="parallaxShape2"></div>
-  <div class="reveal">
-    <p class="section-label">What We Do</p>
-    <h2 class="section-title">Three Disciplines.<br>One Vision.</h2>
-  </div>
-  <div class="services-grid">
-    <div class="service-card reveal reveal-delay-1">
-      <div class="service-num">01</div>
-      <div class="service-title">Residential Design</div>
-      <p class="service-desc">Private homes and estates conceived around how you actually live — not aspirational templates. From compact urban dwellings to expansive rural retreats, each project begins with deep listening.</p>
-      <span class="service-tag">Luxury &amp; Bespoke</span>
-    </div>
-    <div class="service-card reveal reveal-delay-2">
-      <div class="service-num">02</div>
-      <div class="service-title">Urban Planning</div>
-      <p class="service-desc">Neighbourhoods, mixed-use districts and civic infrastructure designed to evolve gracefully. We balance density with dignity, commerce with community, and ambition with constraint.</p>
-      <span class="service-tag">City-Scale Thinking</span>
-    </div>
-    <div class="service-card reveal reveal-delay-3">
-      <div class="service-num">03</div>
-      <div class="service-title">Sustainable Architecture</div>
-      <p class="service-desc">Passive design, regenerative materials and biophilic integration — delivered without compromise to beauty or performance. Certification-ready and time-proof by default.</p>
-      <span class="service-tag">Net-Zero Ready</span>
-    </div>
-  </div>
-</section>
+    <!-- Team Section -->
+    <section class="team" id="team">
+        <div class="container">
+            <div class="team-header reveal">
+                <span class="label">The Founders</span>
+                <h2>One team. Two very different vantage points.</h2>
+                <p>Together, we offer a rare combination of public-sector implementation expertise and international design sophistication.</p>
+            </div>
+            <div class="team-grid">
+                <div class="team-card reveal">
+                    <div class="team-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80" alt="Nikita Kinge">
+                    </div>
+                    <div class="team-info">
+                        <span class="team-role">Co-Founder / Urban Designer</span>
+                        <h3>Nikita Kinge</h3>
+                        <p class="team-bio">Architect from CEPT University and BNCA. Four years leading 10+ urban design and mobility projects across India, partnering with municipal corporations, institutions, and multidisciplinary teams.</p>
+                        <p class="team-clients"><strong>Experience:</strong> TUL Urban Lab, MC, GMC, WRI India, BYCS India, SMC, MIDFC, MyBYK, aProach, Urban Voice</p>
+                    </div>
+                </div>
+                <div class="team-card reveal">
+                    <div class="team-image-wrap">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80" alt="Shambhavi Panse">
+                    </div>
+                    <div class="team-info">
+                        <span class="team-role">Co-Founder / Urban Designer</span>
+                        <h3>Shambhavi Panse</h3>
+                        <p class="team-bio">Architect from CEPT University and BNCA. Four years contributing to large-scale master planning and public realm projects across India, the Middle East, and the UK.</p>
+                        <p class="team-clients"><strong>Experience:</strong> AECOM, AVN, DDA Dubai, Diu Smart City, AMC, GMC, GMRC, UMTC</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Portfolio -->
-<section id="portfolio">
-  <div class="portfolio-header">
-    <div>
-      <p class="section-label reveal">Selected Works</p>
-      <h2 class="section-title reveal reveal-delay-1">Projects</h2>
-    </div>
-    <a href="#contact" class="portfolio-link reveal reveal-delay-2">Commission a project →</a>
-  </div>
-  <div class="portfolio-grid">
-    <div class="portfolio-item reveal">
-      <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=900&q=80&auto=format&fit=crop" alt="Casa Penumbra — private villa, Portugal" loading="lazy">
-      <div class="portfolio-caption">
-        <h3>Casa Penumbra</h3>
-        <p>Private Villa — Alentejo, Portugal</p>
-      </div>
-    </div>
-    <div class="portfolio-item reveal reveal-delay-1">
-      <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80&auto=format&fit=crop" alt="The Kettner Block — urban mixed-use" loading="lazy">
-      <div class="portfolio-caption">
-        <h3>The Kettner Block</h3>
-        <p>Mixed-Use — Hamburg</p>
-      </div>
-    </div>
-    <div class="portfolio-item reveal reveal-delay-2">
-      <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80&auto=format&fit=crop" alt="Meridian House — luxury home" loading="lazy">
-      <div class="portfolio-caption">
-        <h3>Meridian House</h3>
-        <p>Residential — Cape Town</p>
-      </div>
-    </div>
-    <div class="portfolio-item reveal reveal-delay-2">
-      <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80&auto=format&fit=crop" alt="Grünwald Pavilion — sustainable public building" loading="lazy">
-      <div class="portfolio-caption">
-        <h3>Grünwald Pavilion</h3>
-        <p>Cultural — Munich</p>
-      </div>
-    </div>
-    <div class="portfolio-item reveal reveal-delay-3">
-      <img src="https://images.unsplash.com/photo-1449844908441-8829872d2607?w=600&q=80&auto=format&fit=crop" alt="The Root Collective — sustainable housing estate" loading="lazy">
-      <div class="portfolio-caption">
-        <h3>The Root Collective</h3>
-        <p>Sustainable Estate — Oslo</p>
-      </div>
-    </div>
-  </div>
-</section>
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="contact-content reveal">
+                <span class="label" style="color: var(--color-accent); margin-bottom: 1.5rem; display: block;">Work Together</span>
+                <h2>Let's build cities that belong to everyone.</h2>
+                <p style="font-size: 1.25rem; color: rgba(245, 242, 237, 0.6); margin-bottom: 4rem;">Whether you're a luxury homeowner envisioning a private estate or a commercial developer planning the next urban landmark, we bring the design bandwidth and strategic clarity your project demands.</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-card reveal">
+                    <span class="label">Co-Founder</span>
+                    <h3>Nikita Kinge</h3>
+                    <a href="mailto:nikita.kinge@pivotcommons.com">nikita.kinge@pivotcommons.com</a>
+                    <a href="tel:+917776092679">+91 77760 92679</a>
+                    <p>Urban Design & Mobility Specialist</p>
+                </div>
+                <div class="contact-card reveal">
+                    <span class="label">Co-Founder</span>
+                    <h3>Shambhavi Panse</h3>
+                    <a href="mailto:shambhavi.panse@pivotcommons.com">shambhavi.panse@pivotcommons.com</a>
+                    <a href="tel:+918149102867">+91 81491 02867</a>
+                    <p>Master Planning & Public Realm Specialist</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Process -->
-<section id="process">
-  <p class="section-label reveal">How We Work</p>
-  <h2 class="section-title reveal reveal-delay-1">A Method Built on Inquiry</h2>
-  <div class="process-steps">
-    <div class="process-step reveal">
-      <div class="process-step-num">01</div>
-      <div class="process-step-title">Discovery</div>
-      <p class="process-step-desc">We immerse ourselves in your world — your routines, your ambitions, your site. Every project begins with careful listening before a single line is drawn.</p>
-    </div>
-    <div class="process-step reveal reveal-delay-1">
-      <div class="process-step-num">02</div>
-      <div class="process-step-title">Concept</div>
-      <p class="process-step-desc">Bold structural ideas, tested against site conditions, climate, materiality, and your brief. We bring two or three directions — never a committee-averaged middle ground.</p>
-    </div>
-    <div class="process-step reveal reveal-delay-2">
-      <div class="process-step-num">03</div>
-      <div class="process-step-title">Development</div>
-      <p class="process-step-desc">Technical resolution without creative compromise. Structural engineering, passive performance, material specification, and interior detailing all converge here.</p>
-    </div>
-    <div class="process-step reveal reveal-delay-3">
-      <div class="process-step-num">04</div>
-      <div class="process-step-title">Delivery</div>
-      <p class="process-step-desc">Site presence, contractor partnerships, and quality oversight. We remain involved until the last detail is right — and stay in touch long after.</p>
-    </div>
-  </div>
-</section>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">PIVOT COMMONS</div>
+                <div class="footer-tagline">Design. Narrate. Shift.</div>
+                <div class="footer-copy">© 2026 Pivot Commons. All rights reserved.</div>
+            </div>
+        </div>
+    </footer>
 
-<!-- Testimonial -->
-<section id="testimonial">
-  <div class="testimonial-quote-mark" aria-hidden="true">"</div>
-  <blockquote class="testimonial-text reveal">
-    Pivot Commons didn't just build us a house. They built us a relationship with light — with the hillside, the seasons, the way morning enters a room. We didn't know architecture could feel this personal.
-  </blockquote>
-  <p class="testimonial-author reveal reveal-delay-1">— Margit &amp; Leon Hartfeld</p>
-  <p class="testimonial-role reveal reveal-delay-2">Residential Client — Bavaria, Germany</p>
-</section>
+    <script>
+        // Navigation scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
 
-<!-- Contact -->
-<section id="contact">
-  <div>
-    <p class="section-label reveal">Get in Touch</p>
-    <h2 class="section-title reveal reveal-delay-1">Let's Build Something Worth Building</h2>
-    <p class="reveal reveal-delay-2">We take on a limited number of commissions each year to ensure every project receives our full attention. Tell us about yours.</p>
-    <div class="contact-info reveal reveal-delay-3">
-      <div class="contact-row">
-        <span class="contact-row-label">Studio</span>
-        <span class="contact-row-value">Speicherstadt, Hamburg, Germany</span>
-      </div>
-      <div class="contact-row">
-        <span class="contact-row-label">Email</span>
-        <span class="contact-row-value">hello@pivotcommons.com</span>
-      </div>
-      <div class="contact-row">
-        <span class="contact-row-label">Phone</span>
-        <span class="contact-row-value">+49 40 123 456 78</span>
-      </div>
-    </div>
-  </div>
-  <form class="contact-form reveal reveal-delay-2" onsubmit="handleSubmit(event)">
-    <div class="form-group">
-      <input type="text" placeholder="Your Name" required>
-    </div>
-    <div class="form-group">
-      <input type="email" placeholder="Email Address" required>
-    </div>
-    <div class="form-group">
-      <select>
-        <option value="" disabled selected>Project Type</option>
-        <option>Residential Design</option>
-        <option>Urban Planning</option>
-        <option>Sustainable Architecture</option>
-        <option>Commercial Development</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <textarea placeholder="Tell us about your project — scale, location, timeline, and what matters most to you."></textarea>
-    </div>
-    <div class="form-submit">
-      <button type="submit" class="btn-primary">Send Enquiry</button>
-      <span class="form-note">We respond within 48 hours.</span>
-    </div>
-  </form>
-</section>
+        // Scroll-triggered reveal animations
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        });
 
-<!-- Footer -->
-<footer>
-  <span class="footer-logo">Pivot Commons</span>
-  <span class="footer-copy">© 2026 Pivot Commons GmbH. All rights reserved.</span>
-  <ul class="footer-links">
-    <li><a href="#">Instagram</a></li>
-    <li><a href="#">LinkedIn</a></li>
-    <li><a href="#">Dezeen</a></li>
-    <li><a href="#">Privacy</a></li>
-  </ul>
-</footer>
+        revealElements.forEach(el => revealObserver.observe(el));
 
-<script>
-  /* ── CURSOR ── */
-  const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursor-ring');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
-  });
-  function animRing() {
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    ring.style.transform = `translate(${rx - 19}px, ${ry - 19}px)`;
-    requestAnimationFrame(animRing);
-  }
-  animRing();
-  document.querySelectorAll('a, button, .portfolio-item, .service-card').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      ring.style.width = '60px';
-      ring.style.height = '60px';
-      ring.style.marginLeft = '-11px';
-      ring.style.marginTop = '-11px';
-      ring.style.opacity = '0.5';
-    });
-    el.addEventListener('mouseleave', () => {
-      ring.style.width = '38px';
-      ring.style.height = '38px';
-      ring.style.marginLeft = '0';
-      ring.style.marginTop = '0';
-      ring.style.opacity = '1';
-    });
-  });
+        // Parallax effect for projects section
+        const parallaxBg = document.querySelector('.projects-parallax');
+        let ticking = false;
 
-  /* ── NAV SCROLL ── */
-  const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 60);
-  });
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrolled = window.pageYOffset;
+                    const projectsSection = document.querySelector('.projects');
+                    const sectionTop = projectsSection.offsetTop;
+                    const sectionHeight = projectsSection.offsetHeight;
 
-  /* ── HERO BG LOAD ── */
-  window.addEventListener('load', () => {
-    document.getElementById('heroBg').classList.add('loaded');
-  });
-
-  /* ── SCROLL REVEAL ── */
-  const revealEls = document.querySelectorAll('.reveal');
-  const revealObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        revealObs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
-  revealEls.forEach(el => revealObs.observe(el));
-
-  /* ── PARALLAX (services bg shapes) ── */
-  const shape1 = document.getElementById('parallaxShape1');
-  const shape2 = document.getElementById('parallaxShape2');
-  const servicesSection = document.getElementById('services');
-  window.addEventListener('scroll', () => {
-    const rect = servicesSection.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      const progress = -rect.top / (rect.height + window.innerHeight);
-      shape1.style.transform = `translateY(${progress * 80}px)`;
-      shape2.style.transform = `translateY(${progress * -60}px)`;
-    }
-  }, { passive: true });
-
-  /* ── FORM SUBMIT ── */
-  function handleSubmit(e) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    btn.textContent = 'Sent ✓';
-    btn.style.background = 'var(--moss)';
-    btn.disabled = true;
-  }
-</script>
+                    if (scrolled + window.innerHeight > sectionTop && scrolled < sectionTop + sectionHeight) {
+                        const relativeScroll = scrolled - sectionTop;
+                        const speed = 0.4;
+                        parallaxBg.style.transform = `translateY(${relativeScroll * speed}px) scale(1.1)`;
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    </script>
 </body>
 </html>
